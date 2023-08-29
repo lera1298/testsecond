@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ASCII"?>
+<sdkproject:SdkProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" name="20_06_WS" location="C:/work/Xilinx_lab/DMA_btn_nex_prj_2/nexys_lin_true_sd19/20_06/20_06_WS" platform="C:/work/Xilinx_lab/DMA_btn_nex_prj_2/nexys_lin_true_sd19/20_06/microblaze_top_wrapper/export/microblaze_top_wrapper/microblaze_top_wrapper.xpfm" platformUID="xilinx:nexys4_ddr::0.0(custom)" systemProject="20_06_WS_system" sysConfig="microblaze_top_wrapper" runtime="cpp" cpu="freertos10_xilinx_domain" cpuInstance="microblaze_0" os="freertos10_xilinx" mssSignature="8518b103f45e83df85ef23c3eb25dfbf">
+  <configuration name="Debug" id="xilinx.gnu.mb.exe.debug.1501902180">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+    <lastBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <configuration name="Release" id="xilinx.gnu.mb.exe.release.2053812781" dirty="true">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <template appTemplateName="freertos_lwip_echo_server" hasBspSettings="true"/>
+</sdkproject:SdkProject>

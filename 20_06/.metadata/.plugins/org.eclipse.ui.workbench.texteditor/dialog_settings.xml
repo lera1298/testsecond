@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item value="false" key="isRegEx"/>
+		<item value="echo_application_thread" key="selection"/>
+		<item value="false" key="casesensitive"/>
+		<item value="false" key="incremental"/>
+		<item value="true" key="wrap"/>
+		<item value="false" key="wholeword"/>
+		<list key="findhistory">
+			<item value="echo_application_thread"/>
+			<item value="print_echo_app_header"/>
+			<item value="buffer"/>
+			<item value="br"/>
+			<item value="fildst"/>
+			<item value="hlen"/>
+			<item value="bw"/>
+			<item value="size_f"/>
+			<item value="size_wasm"/>
+			<item value="a_1"/>
+			<item value="nput; /* The driver instance for GPIO Device configured as I/P */"/>
+			<item value="exmpl"/>
+			<item value="wasm"/>
+			<item value="*wasm"/>
+			<item value="SD_File_2"/>
+		</list>
+		<list key="replacehistory">
+		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item value="284" key="DIALOG_WIDTH"/>
+		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
+		<item value="391" key="DIALOG_HEIGHT"/>
+		<item value="1324" key="DIALOG_X_ORIGIN"/>
+		<item value="238" key="DIALOG_Y_ORIGIN"/>
+	</section>
+</section>

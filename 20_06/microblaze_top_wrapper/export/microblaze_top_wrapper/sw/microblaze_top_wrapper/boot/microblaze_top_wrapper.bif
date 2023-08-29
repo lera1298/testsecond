@@ -1,0 +1,6 @@
+/*microblaze_top_wrapper*/
+the_ROM_image:
+{
+   <bitstream> 
+   <elf> 
+}

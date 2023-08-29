@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Webtalk v2018.2 (64-bit)
+# SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
+# 
+# Start of session at: Wed Feb  1 19:31:02 2023
+# Process ID: 9292
+# Current directory: D:/fpga_projects/xilinx/nexys_sdcard/nexys_lin/nexys_lin.sdk/webtalk
+# Command line: wbtcv.exe -mode batch -source sdk_webtalk.tcl
+# Log file: D:/fpga_projects/xilinx/nexys_sdcard/nexys_lin/nexys_lin.sdk/webtalk/webtalk.log
+# Journal file: D:/fpga_projects/xilinx/nexys_sdcard/nexys_lin/nexys_lin.sdk/webtalk\webtalk.jou
+#-----------------------------------------------------------
+source sdk_webtalk.tcl

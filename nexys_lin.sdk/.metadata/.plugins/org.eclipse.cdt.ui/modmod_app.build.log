@@ -1,0 +1,75 @@
+21:50:28 **** Auto Build of configuration Debug for project modmod_app ****
+make all 
+'Building file: ../src/sd.c'
+'Invoking: MicroBlaze gcc compiler'
+mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/sd.o" -I../../modmod_app_bsp/microblaze_0/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v10.0 -mno-xl-soft-mul -mxl-multiply-high -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/sd.d" -MT"src/sd.o" -o "src/sd.o" "../src/sd.c"
+In file included from ../src/sd.h:5:0,
+                 from ../src/sd.c:2:
+../../modmod_app_bsp/microblaze_0/include/xbasic_types.h:115:2: warning: #warning The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert. [-Wcpp]
+ #warning  The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert.
+  ^~~~~~~
+../../modmod_app_bsp/microblaze_0/include/xbasic_types.h:116:2: warning: #warning Please refer the Standalone BSP UG647 for further details [-Wcpp]
+ #warning  Please refer the Standalone BSP UG647 for further details
+  ^~~~~~~
+In file included from ../../modmod_app_bsp/microblaze_0/include/xllfifo.h:204:0,
+                 from ../src/sd.c:6:
+../src/sd.c: In function 'readFromSD':
+../../modmod_app_bsp/microblaze_0/include/xstreamer.h:279:68: warning: value computed is not used [-Wunused-value]
+  ( \
+  ~~~                                                                
+    ((*(InstancePtr)->GetOccupancyFn)((InstancePtr)->FifoInstance)) + \
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+    ( \
+    ~~~                                                              
+      ((InstancePtr)->FrmByteCnt) ? \
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                
+        ((InstancePtr)->FifoWidth - (InstancePtr)->HeadIndex) : \
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+        0 \
+        ~~~                                                          
+    ) \
+    ~~~                                                              
+  )
+  ~                                                                  
+../../modmod_app_bsp/microblaze_0/include/xllfifo.h:469:2: note: in expansion of macro 'XStrm_RxOccupancy'
+  XStrm_RxOccupancy(&((InstancePtr)->RxStreamer))
+  ^~~~~~~~~~~~~~~~~
+../src/sd.c:327:2: note: in expansion of macro 'XLlFifo_RxOccupancy'
+  XLlFifo_RxOccupancy(&in_fifo);
+  ^~~~~~~~~~~~~~~~~~~
+../src/sd.c: In function 'getstatus':
+../../modmod_app_bsp/microblaze_0/include/xstreamer.h:279:68: warning: value computed is not used [-Wunused-value]
+  ( \
+  ~~~                                                                
+    ((*(InstancePtr)->GetOccupancyFn)((InstancePtr)->FifoInstance)) + \
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+    ( \
+    ~~~                                                              
+      ((InstancePtr)->FrmByteCnt) ? \
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                
+        ((InstancePtr)->FifoWidth - (InstancePtr)->HeadIndex) : \
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+        0 \
+        ~~~                                                          
+    ) \
+    ~~~                                                              
+  )
+  ~                                                                  
+../../modmod_app_bsp/microblaze_0/include/xllfifo.h:469:2: note: in expansion of macro 'XStrm_RxOccupancy'
+  XStrm_RxOccupancy(&((InstancePtr)->RxStreamer))
+  ^~~~~~~~~~~~~~~~~
+../src/sd.c:406:2: note: in expansion of macro 'XLlFifo_RxOccupancy'
+  XLlFifo_RxOccupancy(&in_fifo);
+  ^~~~~~~~~~~~~~~~~~~
+'Finished building: ../src/sd.c'
+' '
+'Building target: modmod_app.elf'
+'Invoking: MicroBlaze gcc linker'
+mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../modmod_app_bsp/microblaze_0/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v10.0 -mno-xl-soft-mul -mxl-multiply-high -Wl,--no-relax -Wl,--gc-sections -o "modmod_app.elf"  ./src/cc932.o ./src/diskio.o ./src/ff.o ./src/ffsystem.o ./src/ffunicode.o ./src/helloworld.o ./src/platform.o ./src/sd.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+./src/sd.o: In function `FfsSdPolledExample':
+D:\fpga_projects\xilinx\nexys_sdcard\nexys_lin_true_sd\nexys_lin.sdk\modmod_app\Debug/../src/sd.c:426: undefined reference to `f_mkfs'
+collect2.exe: error: ld returned 1 exit status
+make: *** [modmod_app.elf] Ошибка 1
+
+21:50:29 Build Finished (took 637ms)
+

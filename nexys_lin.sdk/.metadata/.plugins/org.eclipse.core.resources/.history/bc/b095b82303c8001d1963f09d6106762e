@@ -1,0 +1,355 @@
+
+#include "sd.h"
+#include "platform_config.h"
+#include "xil_types.h"
+#include "xil_printf.h"
+#include "xllfifo.h"
+#include "xtmrctr.h"
+#include "xparameters.h"
+
+#include "integer.h"
+#include "axi_sd.h"
+#include "ff.h"
+
+#define DEBUG
+
+XLlFifo in_fifo;
+XLlFifo out_fifo;
+
+u32 resp = 0;
+
+u16 rca = 0;
+u32 cnt = 0;
+u8 data_r[512];
+u8 data_w[512];
+u8 datafunc[64];
+
+XTmrCtr timer1;
+
+u32 sizeSD = 0;
+
+FIL fil;		/* File object */
+FATFS fatfs;
+/*
+ * To test logical drive 0, FileName should be "0:/<File name>" or
+ * "<file_name>". For logical drive 1, FileName should be "1:/<file_name>"
+ */
+char FileName[32] = "Test.bin";
+char *SD_File;
+u32 Platform;
+
+u8 DestinationAddress[3*1024] __attribute__ ((aligned(32)));
+u8 SourceAddress[3*1024] __attribute__ ((aligned(32)));
+
+#define TEST 7
+
+
+void timer_setup()
+{
+	XTmrCtr_Initialize(&timer1, XPAR_AXI_TIMER_0_DEVICE_ID);
+	XTmrCtr_SetResetValue(&timer1, 0, 0);
+}
+
+
+void test_sd()
+{
+	XTmrCtr_Reset(&timer1, 0);
+	XTmrCtr_Start(&timer1, 0);
+	//readFromSD(0, data_r);
+	//eraseSD(0);
+	//eraseSD(1);
+//	data_w[0] = 0xFF;
+//	data_w[509] = 0xB0;
+//	data_w[510] = 0xDE;
+//	data_w[511] = 0x00;
+//	writeToSD(0, data_w);
+//
+//	data_w[0] = 0xFF;
+//	data_w[509] = 0xB0;
+//	data_w[510] = 0xAC;
+//	data_w[511] = 0xFF;
+//	writeToSD(1, data_w);
+//
+//	data_w[0] = 0x00;
+//	data_w[510] = 0xBE;
+//	data_w[511] = 0x1F;
+//	writeToSD(0, data_w);
+
+	//readFromSD(0, data_r);
+	//readFromSD(1, data_r);
+	*((u32*)data_w) = 0xDEADBEEF;
+	//readFromSD(0, data_r);
+	//eraseSD(1);
+	writeToSD(0, data_w);
+	writeToSD(1, data_w);
+
+	XTmrCtr_Stop(&timer1,0);
+	xil_printf("timer val: %d\r\n", XTmrCtr_GetValue(&timer1,0));
+
+}
+
+void init_sd_core()
+{
+	AXI_SD_CORE_WriteControl(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 0x0E);
+	AXI_SD_CORE_WriteCmdTimeOut(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 12500000);
+	AXI_SD_CORE_WriteDataTimeOut(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 12500000);
+	AXI_SD_CORE_WriteClkDiv(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 3);
+	AXI_SD_CORE_WriteBlckSize(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 0x1FF);
+	AXI_SD_CORE_WriteCntrlSettings(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 1);
+	AXI_SD_CORE_WriteBlckCount(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 0);
+
+	XLlFifo_Initialize(&in_fifo, XPAR_AXI_FIFO_MM_S_1_BASEADDR);
+	XLlFifo_Initialize(&out_fifo, XPAR_AXI_FIFO_MM_S_0_BASEADDR);
+}
+
+u8 send_cmd(u8 cmd, u32 arg, u8 resp_chk, u32 *resp)
+{
+	AXI_SD_CORE_WriteControl(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 6);
+
+	AXI_SD_CORE_WriteArgumentReg(XPAR_AXI_SD_0_S00_AXI_BASEADDR, arg);
+	AXI_SD_CORE_WriteCommandReg(XPAR_AXI_SD_0_S00_AXI_BASEADDR, (cmd << OFFSET_CMD_IDX) | resp_chk);
+
+	AXI_SD_CORE_WriteControl(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 1);
+
+#ifdef DEBUG
+	xil_printf("cmd: %d  arg: 0x%x\r\n", cmd, arg);
+#endif
+
+	while(AXI_SD_CORE_ReadCmdIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR) == 0){};
+
+#ifdef DEBUG
+	xil_printf("sd_int: 0x%x\r\n", AXI_SD_CORE_ReadCmdIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+	xil_printf("ans : 0x%x\r\n", AXI_SD_CORE_ReadResp0(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+#endif
+
+	*resp = AXI_SD_CORE_ReadResp0(XPAR_AXI_SD_0_S00_AXI_BASEADDR);
+
+	if(AXI_SD_CORE_ReadCmdIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR) != 1){
+
+		xil_printf("sd_error: 0x%x\r\n", AXI_SD_CORE_ReadCmdIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+		xil_printf("resp : 0x%x\r\n", *resp);
+		return 1;
+	}
+	return 0;
+}
+
+u8 initSD()
+{
+	u32 resp41 = 0;
+
+	xil_printf("sd detect: %d\r\n", AXI_SD_CORE_ReadFlags(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+
+	if(send_cmd(0, 0x00, 0, &resp) != XST_SUCCESS){
+		xil_printf("Error initSD\r\n");
+		return 1;
+	}
+	if(send_cmd(8, 0x170, CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error initSD\r\n");
+		return 1;
+	}
+
+	do{
+		if(send_cmd(55, 0x00, CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+			xil_printf("Error initSD\r\n");
+			return 1;
+		}
+		if(send_cmd(41, 0x50000000 + (resp41 & 0xFFFFFF), CMD_WAIT_SHORT_RESP, &resp41) != XST_SUCCESS){
+			xil_printf("Error initSD\r\n");
+			return 1;
+		}
+	}
+	while( (resp41 >> 31) != 1  );
+
+	if(send_cmd(2, 0x00, CMD_WAIT_LONG_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error initSD\r\n");
+		return 1;
+	}
+	if(send_cmd(3, 0x00, CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error initSD\r\n");
+		return 1;
+	}
+
+	rca = (resp >> 16);
+
+	xil_printf("SD card initialized. RCA: 0x%x\r\n", rca);
+
+	getCSD();
+
+	return 0;
+}
+
+u8 startSD()
+{
+	if(send_cmd(7, (rca << 16), CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error startSD\r\n");
+		return 1;
+	}
+	if(send_cmd(13,(rca << 16), CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error startSD\r\n");
+		return 1;
+	}
+
+	if(send_cmd(55, (rca << 16), CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error startSD\r\n");
+		return 1;
+	}
+	if(send_cmd(6, 2, CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error startSD\r\n");
+		return 1;
+	}
+
+	xil_printf("SD card started form data read/write\r\n");
+
+	AXI_SD_CORE_WriteClkDiv(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 1);
+
+	return 0;
+
+}
+
+u8 readFromSD(u32 block_num, u8 * data)
+{
+	u32 nob = 0;
+
+	if(send_cmd(17, block_num, CMD_DATA_READ | CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error readSD\r\n");
+		return 1;
+	}
+
+	while(AXI_SD_CORE_ReadDataIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR) == 0);
+
+#ifdef DEBUG
+	xil_printf("rd data int: 0x%x\r\n", AXI_SD_CORE_ReadDataIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+#endif
+
+	XLlFifo_RxOccupancy(&in_fifo);
+	nob = XLlFifo_RxGetLen(&in_fifo);
+
+#ifdef DEBUG
+	xil_printf("nob: %d\r\n", nob);
+#endif
+
+	XLlFifo_Read(&in_fifo, data, nob);
+
+#ifdef DEBUG
+
+	u32 i = 0;
+
+	for(i=0;i<nob;i++)
+		xil_printf("D[%d] = 0x%x\r\n",i,data[i]);
+#endif
+
+
+	return 0;
+}
+
+u8 writeToSD(u32 block_num, u8 * data)
+{
+
+	XLlFifo_Write(&out_fifo, data, 512);
+	XLlFifo_TxSetLen(&out_fifo, 512);
+
+	while(XLlFifo_IsTxDone(&out_fifo) != TRUE){};
+
+	if(send_cmd(24, block_num, CMD_DATA_WRITE | CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+		xil_printf("Error writeSD\r\n");
+		return 1;
+	}
+
+	while(AXI_SD_CORE_ReadDataIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR) == 0){};
+
+	do{
+		if(send_cmd(13,(rca << 16), CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+			xil_printf("Error writeSD\r\n");
+			return 1;
+		}
+	}
+	while((( resp >> 9) & 0x0F) != 4);
+
+#ifdef DEBUG
+	xil_printf("wr data int: 0x%x\r\n", AXI_SD_CORE_ReadDataIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+#endif
+
+
+	return 0;
+}
+
+void eraseSD(u32 block_num)
+{
+	send_cmd(32, block_num, CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp);
+	send_cmd(33, block_num, CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp);
+	send_cmd(38, 0, CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp);
+
+	do{
+		send_cmd(13,(rca << 16), CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp);
+	}
+	while(((resp >> 9) & 0x0F) != 4);
+}
+
+void getstatus()
+{
+	u32 i = 0, nob = 0;
+	u8 data_st[512];
+
+	AXI_SD_CORE_WriteBlckSize(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 0x3F);
+	AXI_SD_CORE_WriteCntrlSettings(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 1);
+
+	send_cmd(55, (rca << 16), CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp);
+	send_cmd(13,(rca << 16), CMD_DATA_READ | CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp);
+
+	while(AXI_SD_CORE_ReadDataIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR) == 0);
+
+	xil_printf("rd data int: 0x%x\r\n", AXI_SD_CORE_ReadDataIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+
+	XLlFifo_RxOccupancy(&in_fifo);
+	nob = XLlFifo_RxGetLen(&in_fifo);
+
+	xil_printf("nob: %d\r\n", nob);
+
+	XLlFifo_Read(&in_fifo, data_st, nob);
+
+	AXI_SD_CORE_WriteBlckSize(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 0x1FF);
+	AXI_SD_CORE_WriteCntrlSettings(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 1);
+
+	for(i=0;i<nob;i++)
+		xil_printf("D[%d] = 0x%x\r\n",i,data_st[i]);
+}
+
+void extractSD()
+{
+	if(send_cmd(7, (rca << 16), CMD_CHK_IDX | CMD_CHK_CRC | CMD_WAIT_SHORT_RESP, &resp) != XST_SUCCESS){
+			xil_printf("Error deselectSD\r\n");
+			return;
+	}
+}
+
+void getCSD()
+{
+	AXI_SD_CORE_WriteControl(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 0x06);
+
+	AXI_SD_CORE_WriteArgumentReg(XPAR_AXI_SD_0_S00_AXI_BASEADDR, (rca << 16));
+	AXI_SD_CORE_WriteCommandReg(XPAR_AXI_SD_0_S00_AXI_BASEADDR, (9 << OFFSET_CMD_IDX) | CMD_WAIT_LONG_RESP);
+
+	AXI_SD_CORE_WriteControl(XPAR_AXI_SD_0_S00_AXI_BASEADDR, 0x01);
+
+#ifdef DEBUG
+	xil_printf("cmd: %d  arg: 0x%x\r\n", 9, (rca << 16));
+#endif
+
+	while(AXI_SD_CORE_ReadCmdIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR) == 0){};
+
+	sizeSD = (AXI_SD_CORE_ReadResp1(XPAR_AXI_SD_0_S00_AXI_BASEADDR) << 16) | (AXI_SD_CORE_ReadResp2(XPAR_AXI_SD_0_S00_AXI_BASEADDR) >> 16);
+
+#ifdef DEBUG
+	xil_printf("sd_int: 0x%x\r\n", AXI_SD_CORE_ReadCmdIntStatus(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+
+	xil_printf("ans1 : 0x%x\r\n", AXI_SD_CORE_ReadResp0(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+	xil_printf("ans2 : 0x%x\r\n", AXI_SD_CORE_ReadResp1(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+	xil_printf("ans3 : 0x%x\r\n", AXI_SD_CORE_ReadResp2(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+	xil_printf("ans4 : 0x%x\r\n", AXI_SD_CORE_ReadResp3(XPAR_AXI_SD_0_S00_AXI_BASEADDR));
+#endif
+
+	xil_printf("sd size: %d Kbytes\r\n", (sizeSD+1) * 512);
+	xil_printf("number of sectors: %d\r\n", (sizeSD + 1) * 1024);
+
+
+}

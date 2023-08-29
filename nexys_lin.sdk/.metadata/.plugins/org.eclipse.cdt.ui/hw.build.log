@@ -1,0 +1,38 @@
+17:48:49 **** Auto Build of configuration Debug for project hw ****
+make all 
+'Building file: ../src/helloworld.c'
+'Invoking: MicroBlaze gcc compiler'
+mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/helloworld.o" -I../../standalone_bsp_0/microblaze_0/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v10.0 -mno-xl-soft-mul -mxl-multiply-high -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/helloworld.d" -MT"src/helloworld.o" -o "src/helloworld.o" "../src/helloworld.c"
+../src/helloworld.c: In function 'main':
+../src/helloworld.c:91:7: warning: implicit declaration of function 'printHex'; did you mean 'rindex'? [-Wimplicit-function-declaration]
+       printHex(buff, BLKSIZE);
+       ^~~~~~~~
+       rindex
+../src/helloworld.c: At top level:
+../src/helloworld.c:96:6: warning: conflicting types for 'printHex'
+ void printHex(const void *lpvbits, const unsigned int n) {
+      ^~~~~~~~
+../src/helloworld.c:91:7: note: previous implicit declaration of 'printHex' was here
+       printHex(buff, BLKSIZE);
+       ^~~~~~~~
+'Finished building: ../src/helloworld.c'
+' '
+'Building file: ../src/platform.c'
+'Invoking: MicroBlaze gcc compiler'
+mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/platform.o" -I../../standalone_bsp_0/microblaze_0/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v10.0 -mno-xl-soft-mul -mxl-multiply-high -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/platform.d" -MT"src/platform.o" -o "src/platform.o" "../src/platform.c"
+'Finished building: ../src/platform.c'
+' '
+'Building target: hw.elf'
+'Invoking: MicroBlaze gcc linker'
+mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../standalone_bsp_0/microblaze_0/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v10.0 -mno-xl-soft-mul -mxl-multiply-high -Wl,--no-relax -Wl,--gc-sections -o "hw.elf"  ./src/sd_wb_files/mmc.o ./src/sd_wb_files/ocsdc.o  ./src/helloworld.o ./src/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group -Wl,--start-group,-lxilffs,-lxil,-lgcc,-lc,--end-group
+'Finished building target: hw.elf'
+' '
+'Invoking: MicroBlaze Print Size'
+mb-size hw.elf  |tee "hw.elf.size"
+   text	   data	    bss	    dec	    hex	filename
+  75464	   1572	   8292	  85328	  14d50	hw.elf
+'Finished building: hw.elf.size'
+' '
+
+17:48:51 Build Finished (took 1s.540ms)
+

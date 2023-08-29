@@ -1,0 +1,38 @@
+{
+   ExpandedHierarchyInLayout: "",
+   guistr: "# # String gsaved with Nlview 6.8.5  2018-01-30 bk=1.4354 VDI=40 GEI=35 GUI=JA:1.6 non-TLS-threadsafe
+#  -string -flagsOSRD
+preplace port s_axi_aclk -pg 1 -y 380 -defaultsOSRD
+preplace port sd_clk_o -pg 1 -y 210 -defaultsOSRD
+preplace port AXI_LITE_SPI -pg 1 -y 340 -defaultsOSRD
+preplace port s_axi_aresetn -pg 1 -y 400 -defaultsOSRD
+preplace port cmd_io -pg 1 -y 350 -defaultsOSRD
+preplace port AXI_LITE_SDCS -pg 1 -y 360 -defaultsOSRD
+preplace portBus dat_io -pg 1 -y 310 -defaultsOSRD
+preplace inst xlconcat_0 -pg 1 -lvl 2 -y 80 -defaultsOSRD
+preplace inst PmodSD_0 -pg 1 -lvl 1 -y 370 -defaultsOSRD
+preplace inst bidir_buffs_0 -pg 1 -lvl 3 -y 320 -defaultsOSRD
+preplace netloc Conn1 1 0 1 NJ
+preplace netloc bidir_buffs_0_dat_o1 1 1 3 360 180 NJ 180 880
+preplace netloc Conn2 1 0 1 NJ
+preplace netloc s_axi_aclk_1 1 0 1 NJ
+preplace netloc bidir_buffs_0_dat_o2 1 1 3 380 190 NJ 190 870
+preplace netloc PmodSD_0_Pmod_out_pin2_o 1 1 2 NJ 300 580
+preplace netloc PmodSD_0_Pmod_out_pin7_o 1 1 1 350
+preplace netloc s_axi_aresetn_1 1 0 1 NJ
+preplace netloc bidir_buffs_0_dat_o3 1 1 3 370 470 NJ 470 890
+preplace netloc PmodSD_0_Pmod_out_pin3_t 1 1 2 330J 310 N
+preplace netloc PmodSD_0_Pmod_out_pin1_o 1 1 1 330
+preplace netloc PmodSD_0_Pmod_out_pin2_t 1 1 2 NJ 440 580
+preplace netloc bidir_buffs_0_cmd_o 1 1 3 340J 480 580J 450 870
+preplace netloc xlconcat_0_dout 1 2 1 580
+preplace netloc PmodSD_0_Pmod_out_pin4_o 1 1 3 370J 170 NJ 170 890J
+preplace netloc Net 1 3 1 910J
+preplace netloc Net1 1 3 1 900J
+preplace netloc PmodSD_0_Pmod_out_pin3_o 1 1 1 320
+preplace netloc bidir_buffs_0_dat_o0 1 1 3 380 460 NJ 460 880
+preplace netloc PmodSD_0_Pmod_out_pin8_o 1 1 1 390
+levelinfo -pg 1 -20 160 490 750 930 -top -10 -bot 670
+",
+}
+

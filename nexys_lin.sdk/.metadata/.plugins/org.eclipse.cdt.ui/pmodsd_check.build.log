@@ -1,0 +1,21 @@
+18:02:11 **** Auto Build of configuration Debug for project pmodsd_check ****
+make all 
+'Building file: ../src/helloworld.c'
+'Invoking: MicroBlaze gcc compiler'
+mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/helloworld.o" -I../../standalone_mod2_bsp/microblaze_0/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v10.0 -mno-xl-soft-mul -mxl-multiply-high -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/helloworld.d" -MT"src/helloworld.o" -o "src/helloworld.o" "../src/helloworld.c"
+'Finished building: ../src/helloworld.c'
+' '
+'Building target: pmodsd_check.elf'
+'Invoking: MicroBlaze gcc linker'
+mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../standalone_mod2_bsp/microblaze_0/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v10.0 -mno-xl-soft-mul -mxl-multiply-high -Wl,--no-relax -Wl,--gc-sections -o "pmodsd_check.elf"  ./src/helloworld.o ./src/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+'Finished building target: pmodsd_check.elf'
+' '
+'Invoking: MicroBlaze Print Size'
+mb-size pmodsd_check.elf  |tee "pmodsd_check.elf.size"
+   text	   data	    bss	    dec	    hex	filename
+   3862	    404	   3110	   7376	   1cd0	pmodsd_check.elf
+'Finished building: pmodsd_check.elf.size'
+' '
+
+18:02:12 Build Finished (took 670ms)
+
